@@ -284,6 +284,7 @@ public class Assertions {
             throw new AssertionFailedError(e);
         }
         if (thread.isAlive()) {
+            thread.interrupt();
             String printMessage = message == null ?
                     "Expected: " + timeout + "ms\nActual: " + timeout.toMillis() + "ms" :
                     message + "==>\nExpected: " + timeout + "ms\nActual: " + timeout.toMillis() + "ms";

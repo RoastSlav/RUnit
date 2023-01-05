@@ -18,43 +18,37 @@ public class RUnitCore {
         runMethods(clazz, testMethods, beforeEach, afterEach, beforeClass, afterClass);
     }
 
-    private static void sortMethods(Method[] methods, ArrayList<Method> testMethods, ArrayList<Method> beforeClass, ArrayList<Method> afterClass, ArrayList<Method> beforeEach, ArrayList<Method> afterEach) {
+    private static void sortMethods(Method[] methods, ArrayList<Method> testMethods,
+                                    ArrayList<Method> beforeClass, ArrayList<Method> afterClass,
+                                    ArrayList<Method> beforeEach, ArrayList<Method> afterEach) {
         for (Method method : methods) {
             if (method.isAnnotationPresent(Test.class)) {
                 testMethods.add(method);
                 continue;
             }
             if (method.isAnnotationPresent(BeforeClass.class)) {
-                if (Modifier.isStatic(method.getModifiers())) {
-                    beforeClass.add(method);
-                } else {
-                    System.out.println("BeforeClass annotation can only be used on static methods");
-                    continue;
-                }
+                addNonStaticMethod(method, beforeClass, BeforeClass.class);
+                continue;
             }
             if (method.isAnnotationPresent(AfterClass.class)) {
-                if (Modifier.isStatic(method.getModifiers())) {
-                    afterClass.add(method);
-                } else {
-                    System.out.println("AfterClass annotation can only be used on static methods");
-                    continue;
-                }
+                addNonStaticMethod(method, afterClass, AfterClass.class);
+                continue;
             }
             if (method.isAnnotationPresent(BeforeEach.class)) {
-                if (!Modifier.isStatic(method.getModifiers())) {
-                    beforeEach.add(method);
-                } else {
-                    System.out.println("BeforeEach annotation can only be used on non-static methods");
-                    continue;
-                }
+                addNonStaticMethod(method, beforeEach, BeforeEach.class);
+                continue;
             }
             if (method.isAnnotationPresent(AfterEach.class)) {
-                if (!Modifier.isStatic(method.getModifiers())) {
-                    afterEach.add(method);
-                } else {
-                    System.out.println("AfterEach annotation can only be used on non-static methods");
-                }
+                addNonStaticMethod(method, afterEach, AfterEach.class);
             }
+        }
+    }
+
+    private static void addNonStaticMethod(Method method, ArrayList<Method> methods, Class<?> annotation) {
+        if (!Modifier.isStatic(method.getModifiers())) {
+            methods.add(method);
+        } else {
+            System.out.println(annotation.getName() + " annotation can only be used on non-static methods. Method " + method.getName() + " is static.");
         }
     }
 
@@ -94,7 +88,7 @@ public class RUnitCore {
         }
     }
 
-    public static void invokeMethod(Method method, Object instance) {
+    private static void invokeMethod(Method method, Object instance) {
         try {
             method.setAccessible(true);
             if (method.isAnnotationPresent(RepeatedTest.class)) {
